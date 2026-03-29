@@ -8,22 +8,22 @@ vec3 = np.ndarray
 
 @dataclass
 class PrimitiveGaussian:
-
     alpha: float
     center: vec3
     ang: tuple[int, int, int]
-    coeff: float = 1.0
+    coeff: float
+    norm: float = field(init=False)
 
-    @property
-    def norm(self) -> float:
-        return primitive_norm(self.alpha, self.ang)
+    def __post_init__(self):
+        self.norm = primitive_norm(self.alpha, self.ang)
 
 @dataclass
 class ContractedGaussian:
     center: vec3
     ang: tuple[int, int, int]
     primitives: list[PrimitiveGaussian] = field(default_factory=list)
-
+    _norm: float | None = None
+    
     def __str__(self):
         prims = ", ".join(f"({p.coeff:12.8f}, {p.alpha:12.8f})" for p in self.primitives)
         return (
@@ -35,17 +35,22 @@ class ContractedGaussian:
         self.primitives.append(PrimitiveGaussian(alpha, self.center, self.ang, coeff))
 
     @property
-    def norm(self) -> float:
-        S = 0
+    def norm(self):
+        if self._norm is None:
+            S = 0
 
-        for Ap in self.primitives:
-            for Bp in self.primitives:
-                if Ap == Bp: 
-                    S += Ap.coeff*Bp.coeff
-                else:
-                    S += Ap.coeff*Bp.coeff*overlap_pgto(Ap, Bp)
+            for Ap in self.primitives:
+                for Bp in self.primitives:
+                    if Ap == Bp: 
+                        S += Ap.coeff*Bp.coeff
+                    else:
+                        S += Ap.coeff*Bp.coeff*overlap_pgto(Ap, Bp)
 
-        return 1.0/np.sqrt(S)
+            self._norm = 1.0/np.sqrt(S)
+            return self._norm
+        else:
+            return self._norm
+
 
 def productAB(A: PrimitiveGaussian, B: PrimitiveGaussian) -> tuple[float, float, float, vec3]:
     """
@@ -164,7 +169,7 @@ def nucatr_pgto(A: PrimitiveGaussian, B: PrimitiveGaussian, C: vec3) -> float:
     i, k, m = A.ang
     j, l, n = B.ang
     
-    @lru_cache
+    @lru_cache(maxsize=None)
     def theta(N, i, j, k, l, m, n) -> float:
         if min(i, j, k, l, m, n) < 0:
             return 0.0

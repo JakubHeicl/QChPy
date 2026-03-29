@@ -92,7 +92,7 @@ def read_xyz(filename: str, to_bohr: bool = True) -> tuple[int, list[int], list[
         try:
             number_of_atoms = float(lines[0].split()[0])
         except:
-            print("File is not in a good format")
+            raise RuntimeError("File is not in a good format")
         for line in lines[2:]:
             
             content = line.strip().split()

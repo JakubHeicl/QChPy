@@ -2,6 +2,7 @@ from SCF import SCF
 from SCFLogger import SCFLogger
 from utils import read_xyz
 import argparse
+from pathlib import Path
 from basis_set import BASIS_SETS_FILENAMES
 
 #-------------INPUT PARAMETRES------------------------------------------------------------------------------------------
@@ -44,11 +45,12 @@ def HF_program(xyz_filename: str, basis_type:str, n_elec: int | None = None, e_t
     for Z, coor in zip(Zs, coors):
         atoms.append((Z, coor))
 
-    if not n_elec:
+    if n_elec is None:
         n_elec = sum(Zs)
 
-    if not out_filename:
-         out_filename = f"{xyz_filename.split(".")[0]}.out"
+    if out_filename is None:
+         stem = Path(xyz_filename).stem
+         out_filename = f"{stem}.out"
 
     logger = SCFLogger(xyz_filename, out_filename)
     scf = SCF(atoms, basis_type, n_elec, logger, e_tol, p_rms_tol, maxiter, damping)

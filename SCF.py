@@ -124,6 +124,7 @@ class SCF:
 
         self.logger.tH = perf_counter() - t0
 
+
     def build_E(self) -> None:
         t0 = perf_counter()
         cgtos = self.basis_set.cgtos
@@ -144,7 +145,6 @@ class SCF:
 
                         v = twoel_cgto(cgtos[i], cgtos[j], cgtos[k], cgtos[l])
 
-                        # fill 8-fold symmetry
                         E[i,j,k,l] = v
                         E[j,i,k,l] = v
                         E[i,j,l,k] = v
