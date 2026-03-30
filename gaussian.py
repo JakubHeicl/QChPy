@@ -33,6 +33,7 @@ class ContractedGaussian:
         )
     def add_primitive(self, alpha: float, coeff: float) -> None:
         self.primitives.append(PrimitiveGaussian(alpha, self.center, self.ang, coeff))
+        self._norm = None
 
     @property
     def norm(self):
@@ -41,7 +42,7 @@ class ContractedGaussian:
 
             for Ap in self.primitives:
                 for Bp in self.primitives:
-                    if Ap == Bp: 
+                    if Ap is Bp: 
                         S += Ap.coeff*Bp.coeff
                     else:
                         S += Ap.coeff*Bp.coeff*overlap_pgto(Ap, Bp)

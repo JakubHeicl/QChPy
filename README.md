@@ -13,7 +13,7 @@ The main script, `HF_program.py`, performs the following steps:
    - overlap matrix `S`
    - orthogonalization matrix `X`
    - core Hamiltonian `H`
-   - two-electron repulsion tensor
+   - two-electron repulsion tensor, with Schwarz screening used to skip negligible quartets
    - nuclear repulsion energy
 5. Solves the Roothaan equations in an SCF loop until the energy and density converge.
 6. Writes a human-readable output file with orbitals, energies, convergence history, and timings.
@@ -74,7 +74,7 @@ The solver currently supports:
 but the sets can be easily extended in the JSON format for example from https://www.basissetexchange.org/. Note that not all of the types of Gaussian functions present might be compatible tho. You can also print the available basis names from the CLI:
 
 ```bash
-python HF_program.py --showb True
+python HF_program.py --showb
 ```
 
 ## Running the Hartree-Fock solver
@@ -158,9 +158,23 @@ The repository includes several sample geometries and outputs, such as:
 
 - `H2O.xyz`
 - `NH3.xyz`
-- `ethen.xyz`
+- `guanine.xyz`
 
 There are also example `.out`, and related files that can be used for testing or comparison.
+
+## Milestones
+
+A notable recent milestone is that the solver now converges a guanine test case in the minimal `STO-2G` basis. The included example output `examples/guanine.out` shows:
+
+- 16 atoms
+- 60 basis functions
+- SCF convergence in 50 iterations
+- final total energy `-516.676802918731 Eh`
+- total run time `2652.58 s`
+
+This is a useful regression and performance checkpoint because earlier versions of the project were not practical for a system of this size.
+
+The current ERI build also uses Schwarz screening, which significantly reduces the number of negligible two-electron quartets that need to be evaluated in practice.
 
 ## Limitations
 
@@ -168,7 +182,7 @@ There are also example `.out`, and related files that can be used for testing or
 - No geometry optimization
 - No unrestricted or open-shell treatment
 - No DIIS or more advanced SCF acceleration
-- Full electron repulsion tensor is built explicitly, so larger basis sets can become slow and memory-intensive
+- Even with Schwarz screening, the full electron repulsion tensor is still built explicitly, so larger basis sets can become slow and memory-intensive
 
 ## Summary
 

@@ -2,6 +2,7 @@ import numpy as np
 from gaussian import *
 from basis_set import *
 from SCFLogger import SCFLogger
+from tqdm import tqdm
 from time import perf_counter
 
 Array = np.ndarray
@@ -133,6 +134,18 @@ class SCF:
 
         def pair_index(a, b):
             return a*(a+1)//2 + b
+        
+        npair = n * (n + 1) // 2
+        bounds = np.zeros(npair)
+
+        for i in tqdm(range(n), desc = "Computing the Schwarz screening..."):
+            for j in range(i + 1):
+                pij = pair_index(i, j)
+                bounds[pij] = np.sqrt(abs(twoel_cgto(cgtos[i], cgtos[j], cgtos[i], cgtos[j])))
+
+        eri_thresh = 1e-10
+
+        bar = tqdm(total=n**4/8, desc = "Computing ERI...", smoothing=0)
 
         for i in range(n):
             for j in range(i+1):
@@ -142,8 +155,12 @@ class SCF:
                         pkl = pair_index(k, l)
                         if pij < pkl:
                             continue
+                        if bounds[pij] * bounds[pkl] < eri_thresh:
+                            bar.update(1)
+                            continue
 
                         v = twoel_cgto(cgtos[i], cgtos[j], cgtos[k], cgtos[l])
+                        bar.update(1)
 
                         E[i,j,k,l] = v
                         E[j,i,k,l] = v
@@ -153,7 +170,7 @@ class SCF:
                         E[l,k,i,j] = v
                         E[k,l,j,i] = v
                         E[l,k,j,i] = v
-
+        bar.close()
         self.E = E
         self.logger.tE = perf_counter() - t0
 

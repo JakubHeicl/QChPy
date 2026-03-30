@@ -29,7 +29,7 @@ OUTPUT_FILE: str | None = None             # Output file of the program. If None
 parser = argparse.ArgumentParser()
 parser.add_argument("--input", default = INPUT_FILE, type = str, help = "Input geometry file in .xyz format")
 parser.add_argument("--basis", default = BASIS_TYPE, type = str, help = "Basis set type used for computation")
-parser.add_argument("--showb", default = SHOW_BASIS_TYPES, type = bool, help = "If set to true, the program returns available basis sets type without running the computations")
+parser.add_argument("--showb", default = SHOW_BASIS_TYPES, action = "store_true", help = "If set to true, the program returns available basis sets type without running the computations")
 parser.add_argument("--nelec", default = N_ELEC, type = int, help = "The total number of the electrons, must be even number. If None is specified then Z number of electron is chosen for every atom")
 parser.add_argument("--etol", default = E_TOL, type = float, help = "Maximum energy error tolerance |dE| < etol between iterations used in the SCF cycle")
 parser.add_argument("--ptol", default = P_TOL, type = float, help = "Maximum density error tolerance p_rms < ptol between iterations used in the SCF cycle")

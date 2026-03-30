@@ -96,6 +96,7 @@ class SCFLogger:
         self._fh.write(message)
         if message.endswith("\n"):
             print(message[:-1])
+        self._fh.flush()
 
     def log_meta(self) -> None:
         self.section("RUN INFO")
